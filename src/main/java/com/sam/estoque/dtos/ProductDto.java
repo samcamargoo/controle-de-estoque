@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.sam.estoque.entities.Product;
@@ -29,7 +30,9 @@ public class ProductDto {
 	private LocalDate expirationDate;
 	private boolean expired;
 	private LocalDate acquisitionDate;
+	@NotNull
 	private BigDecimal acquisitionPrice;
+	@NotNull
 	private BigDecimal sellingPrice;
 	private boolean onStock;
 	

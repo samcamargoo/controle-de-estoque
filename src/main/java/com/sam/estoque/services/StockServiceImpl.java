@@ -51,19 +51,15 @@ public class StockServiceImpl implements StockService {
 	public Stock verifyStockItemsQuantityAndTotalValue() throws Exception {
 		
 		verifyExpirationDate();
-		List<Product> products = productRepository.findAll();
-		List<Product> filteredProducts = products.stream()
-				.filter(p -> p.getQuantity() != null && p.getAcquisitionPrice() != null && p.isOnStock() == true)
-				.collect(Collectors.toList());
+		List<Product> products = productRepository.findAllOnStock();
+		
 				
 		Long quantity = 0L;
 		Long expiredProductsQuantity = 0L;
 		BigDecimal totalValue = BigDecimal.ZERO;
 		BigDecimal expiredProductsValue = BigDecimal.ZERO;
 		
-		for (Product p : filteredProducts) {
-			
-			
+		for (Product p : products) {
 			
 			if(!p.isExpired()) {
 				quantity += p.getQuantity();

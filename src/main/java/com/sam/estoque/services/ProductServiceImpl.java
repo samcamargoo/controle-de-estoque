@@ -39,14 +39,6 @@ public class ProductServiceImpl implements ProductService {
 		
 		var product = new Product();
 		BeanUtils.copyProperties(productDto, product);
-		
-		if(product.getQuantity() == null) {
-			product.setQuantity(0);
-		}
-		
-		if(product.getAcquisitionPrice() == null) {
-			product.setAcquisitionPrice(BigDecimal.ZERO);
-		}
 		return ResponseEntity.status(HttpStatus.CREATED).body(productRepository.save(product));
 	}
 

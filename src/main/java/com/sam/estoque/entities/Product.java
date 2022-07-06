@@ -40,6 +40,7 @@ public class Product implements Serializable {
 	private LocalDate acquisitionDate;
 	@Column(nullable = false)
 	private BigDecimal acquisitionPrice;
+	@Column(nullable = false)
 	private BigDecimal sellingPrice;
 	private boolean onStock;
 	private boolean onSale;

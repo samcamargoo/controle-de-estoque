@@ -13,6 +13,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
 	boolean existsByBarCode(String barCode);
 	
+	@Query("SELECT p from Product p WHERE p.onStock = true")
+	List<Product> findAllOnStock();
+	
 	@Query("SELECT p from Product p WHERE p.quantity <= :qntity AND p.onStock = true ORDER BY p.name")
 	List<Product> findAllProductsUnderXQuantity(@Param("qntity") int qntity);
 
