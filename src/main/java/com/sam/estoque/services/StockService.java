@@ -9,8 +9,9 @@ import com.sam.estoque.entities.Stock;
 
 public interface StockService {
 
-	List<ProductDto> productsUnderFiveUnits(int qntity);
+	List<ProductDto> productsUnderXUnits(int qntity);
 	Stock verifyStockItemsQuantityAndTotalValue() throws Exception;
-	List<ProductDto> verifyExpirationDate() throws Exception;
-	ResponseEntity<Object> saleOff(Long id, int percentage);
+	void verifyExpirationDate() throws Exception;
+	ResponseEntity<Object> createSale(Long id, int percentage, int days);
+	void removeExpiredSales();
 }

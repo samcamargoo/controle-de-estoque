@@ -21,25 +21,30 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class StockController {
 
-	private final StockService checkStockService;
+	private final StockService stockService;
 	
 	@GetMapping("/check-product-quantity")
-	public List<ProductDto> productsUnderFiveUnits(@RequestParam int qntity) {
-		return checkStockService.productsUnderFiveUnits(qntity);
+	public List<ProductDto> productsUnderXUnits(@RequestParam int qntity) {
+		return stockService.productsUnderXUnits(qntity);
 	}
 	
 	@GetMapping("/total-value")
 	public Stock verifyItemsQuantityAndTotalValue() throws Exception {
-		return checkStockService.verifyStockItemsQuantityAndTotalValue();
+		return stockService.verifyStockItemsQuantityAndTotalValue();
 	}
 	
 	@GetMapping("/verify-expiration-date")
-	public List<ProductDto> verifyExpirationDate() throws Exception {
-		return checkStockService.verifyExpirationDate();
+	public void verifyExpirationDate() throws Exception {
+		stockService.verifyExpirationDate();
 	}
 	
-	@PostMapping("/sale-off/{id}")
-	public ResponseEntity<Object> createSale(@PathVariable (value="id") Long id, @RequestParam int percentage) {
-		return checkStockService.saleOff(id, percentage);
+	@PostMapping("/create-sale/{id}")
+	public ResponseEntity<Object> createSale(@PathVariable (value="id") Long id, @RequestParam int percentage, @RequestParam int days) {
+		return stockService.createSale(id, percentage, days);
+	}
+	
+	@GetMapping("/remove-expired-sales")
+	public void removeExpiredSales() {
+		stockService.removeExpiredSales();
 	}
 }
