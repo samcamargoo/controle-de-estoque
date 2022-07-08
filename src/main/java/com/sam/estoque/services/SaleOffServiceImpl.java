@@ -3,6 +3,7 @@ package com.sam.estoque.services;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import javax.transaction.Transactional;
@@ -10,8 +11,10 @@ import javax.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import com.sam.estoque.dtos.SaleOffDto;
 import com.sam.estoque.entities.Product;
 import com.sam.estoque.entities.SaleOff;
 import com.sam.estoque.repository.ProductRepository;
@@ -33,11 +36,20 @@ public class SaleOffServiceImpl implements SaleOffService{
 	@Transactional
 	public ResponseEntity<Object> createSale(Long id, int percentage, int days) {
 		
-		if(isOnSale(id)) {
-			return ResponseEntity.status(HttpStatus.CONFLICT).body("Product is on sale already");
+		Optional<Product> productOptional = productRepository.findById(id);
+		
+		if(productOptional.isEmpty()) {
+			return ResponseEntity.status(HttpStatus.CONFLICT).body("Product not found on stock");
 		}
 		
-		Optional<Product> productOptional = productRepository.findById(id);
+		if(!productOptional.get().isOnStock()) {
+			return ResponseEntity.status(HttpStatus.CONFLICT).body("Product is out of stock");
+		}
+		
+		if(productOptional.get().isOnSale()) {
+			return ResponseEntity.status(HttpStatus.CONFLICT).body("Product is already on sale");
+		}
+		
 		
 		var product = new Product();
 		BeanUtils.copyProperties(productOptional.get(), product);
@@ -50,18 +62,14 @@ public class SaleOffServiceImpl implements SaleOffService{
 		saleOff.setEndSaleDay(LocalDate.now().plusDays(days));
 		saleOff.setSalePrice(calculateDiscount(productOptional.get().getSellingPrice(), percentage));
 		saleOff.setCreatedAt(LocalDate.now());
+		saleOffRepository.save(saleOff);
 		log.info("Sale created with {}% discount and will last until {}.", percentage, saleOff.getEndSaleDay());
-		return ResponseEntity.status(HttpStatus.CREATED).body(saleOffRepository.save(saleOff));
+		
+		var saleOffDto = new SaleOffDto(saleOff);
+		return ResponseEntity.status(HttpStatus.CREATED).body(saleOffDto);
 	}
 
-	@Override
-	public boolean isOnSale(Long id) {
-		
-		if(!productRepository.isOnSale(id)) {
-			return false;
-		}
-		return true;
-	}
+
 
 	@Override
 	public BigDecimal calculateDiscount(BigDecimal price, int percentage) {
@@ -70,6 +78,30 @@ public class SaleOffServiceImpl implements SaleOffService{
 		BigDecimal finalPrice = price.subtract(discount).setScale(2, RoundingMode.HALF_EVEN);
 		
 		return finalPrice;
+	}
+
+
+
+	@Override
+	@Transactional
+	@Scheduled(cron = " 0 0 6 * * *", zone = "America/Sao_Paulo")
+	public void removeExpiredSales() {
+	
+		List<SaleOff> expiredSales = saleOffRepository.findExpiredSales();
+		
+		if(expiredSales.size() > 0) {
+			
+			for(SaleOff sale : expiredSales) {
+				
+				var product = new Product();
+				Optional<Product> productOptional = productRepository.findById(sale.getProduct().getId());
+				BeanUtils.copyProperties(productOptional.get(), product);
+				product.setOnSale(false);
+				productRepository.save(product);
+			}
+		}
+	
+		log.info("{} expired sale(s) removed", expiredSales.size());
 	}
 
 }
