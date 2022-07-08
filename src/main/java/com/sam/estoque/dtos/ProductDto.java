@@ -35,6 +35,7 @@ public class ProductDto {
 	@NotNull
 	private BigDecimal sellingPrice;
 	private boolean onStock;
+	private boolean onSale;
 	
 	public ProductDto(Product product) {
 		this.id = product.getId();
@@ -47,5 +48,6 @@ public class ProductDto {
 		this.acquisitionPrice = product.getAcquisitionPrice();
 		this.sellingPrice = product.getSellingPrice();
 		this.onStock = product.isOnStock();
+		this.onSale = product.isOnSale();
 	}
 }

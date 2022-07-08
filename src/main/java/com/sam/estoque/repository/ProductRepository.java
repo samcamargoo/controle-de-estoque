@@ -25,6 +25,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 	@Query("SELECT p from Product p WHERE p.id = :id AND p.onStock = true AND p.expired = false")
 	Optional<Product> saleItems(@Param("id") Long id);
 	
-	@Query("SELECT p from Product p WHERE p.onSale = true AND p.endSaleDay < CURRENT_DATE")
-	List<Product> findExpiredSales();
+	@Query("SELECT p from Product p WHERE p.id = :id AND p.onSale = true")
+	boolean isOnSale(@Param("id") Long id);
 }

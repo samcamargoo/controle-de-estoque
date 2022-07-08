@@ -12,6 +12,5 @@ public interface StockService {
 	List<ProductDto> productsUnderXUnits(int qntity);
 	Stock verifyStockItemsQuantityAndTotalValue() throws Exception;
 	void verifyExpirationDate() throws Exception;
-	ResponseEntity<Object> createSale(Long id, int percentage, int days);
 	void removeExpiredSales();
 }

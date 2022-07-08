@@ -38,10 +38,10 @@ public class StockController {
 		stockService.verifyExpirationDate();
 	}
 	
-	@PostMapping("/create-sale/{id}")
+	/*@PostMapping("/create-sale/{id}")
 	public ResponseEntity<Object> createSale(@PathVariable (value="id") Long id, @RequestParam int percentage, @RequestParam int days) {
 		return stockService.createSale(id, percentage, days);
-	}
+	} */
 	
 	@GetMapping("/remove-expired-sales")
 	public void removeExpiredSales() {

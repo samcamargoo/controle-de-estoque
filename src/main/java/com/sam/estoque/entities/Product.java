@@ -3,12 +3,16 @@ package com.sam.estoque.entities;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -44,9 +48,9 @@ public class Product implements Serializable {
 	private BigDecimal sellingPrice;
 	private boolean onStock;
 	private boolean onSale;
-	@JsonFormat(pattern = "dd/MM/yyyy", shape = JsonFormat.Shape.STRING)
-	private LocalDate endSaleDay;
-	private BigDecimal salePrice;
+	
+	@OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+	private List<SaleOff> products = new ArrayList<>();
 	
 	
 }
