@@ -42,6 +42,10 @@ public class SaleOffServiceImpl implements SaleOffService{
 			return ResponseEntity.status(HttpStatus.CONFLICT).body("Product not found on stock");
 		}
 		
+		if(productOptional.get().isExpired()) {
+			return ResponseEntity.status(HttpStatus.CONFLICT).body("Product is expired");
+		}
+		
 		if(!productOptional.get().isOnStock()) {
 			return ResponseEntity.status(HttpStatus.CONFLICT).body("Product is out of stock");
 		}
@@ -59,6 +63,7 @@ public class SaleOffServiceImpl implements SaleOffService{
 		var saleOff = new SaleOff();
 		saleOff.setProduct(productOptional.get());
 		saleOff.setPercentage(percentage);
+		saleOff.setActive(true);
 		saleOff.setEndSaleDay(LocalDate.now().plusDays(days));
 		saleOff.setSalePrice(calculateDiscount(productOptional.get().getSellingPrice(), percentage));
 		saleOff.setCreatedAt(LocalDate.now());
@@ -81,25 +86,35 @@ public class SaleOffServiceImpl implements SaleOffService{
 	}
 
 
-
+	//Metodo executado todos os dias as 06:00 alterando promoçao vencida para inativa;
 	@Override
 	@Transactional
 	@Scheduled(cron = " 0 0 6 * * *", zone = "America/Sao_Paulo")
 	public void removeExpiredSales() {
 	
+		log.info("Checking expired sales");
+		
 		List<SaleOff> expiredSales = saleOffRepository.findExpiredSales();
 		
-		if(expiredSales.size() > 0) {
+		if(expiredSales.size() < 1) {
+			log.info("No expired sales found");
+			return;
+		}
+		
 			
-			for(SaleOff sale : expiredSales) {
+		for(SaleOff sale : expiredSales) {
 				
 				var product = new Product();
 				Optional<Product> productOptional = productRepository.findById(sale.getProduct().getId());
 				BeanUtils.copyProperties(productOptional.get(), product);
 				product.setOnSale(false);
 				productRepository.save(product);
-			}
+				
+				sale.setActive(false);
+				saleOffRepository.save(sale);
+				
 		}
+		
 	
 		log.info("{} expired sale(s) removed", expiredSales.size());
 	}

@@ -27,8 +27,8 @@ public class SaleOffDto {
 	private int percentage;
 	@NotNull
 	private BigDecimal salePrice;
-	@JsonFormat(pattern = "dd/MM/yyyy", shape = JsonFormat.Shape.STRING)
-	private LocalDate createdAt;
+	
+	private boolean active;
 	
 	public SaleOffDto(SaleOff saleOff) {
 		
@@ -37,6 +37,6 @@ public class SaleOffDto {
 		this.endSaleDay = saleOff.getEndSaleDay();
 		this.percentage = saleOff.getPercentage();
 		this.salePrice = saleOff.getSalePrice();
-		this.createdAt = saleOff.getCreatedAt();
+		this.active = saleOff.isActive();
 	}
 }

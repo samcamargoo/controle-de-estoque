@@ -44,6 +44,7 @@ public class ProductDto {
 		this.quantity = product.getQuantity();
 		this.description = product.getDescription();
 		this.expirationDate = product.getExpirationDate();
+		this.expired = product.isExpired();
 		this.acquisitionDate = product.getAcquisitionDate();
 		this.acquisitionPrice = product.getAcquisitionPrice();
 		this.sellingPrice = product.getSellingPrice();
