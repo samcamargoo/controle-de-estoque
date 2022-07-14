@@ -2,21 +2,17 @@ package com.sam.estoque.services;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.sam.estoque.dtos.ProductDto;
 import com.sam.estoque.entities.Product;
-import com.sam.estoque.entities.SaleOff;
 import com.sam.estoque.entities.Stock;
 import com.sam.estoque.repository.ProductRepository;
-import com.sam.estoque.repository.SaleOffRepository;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 public class StockServiceImpl implements StockService {
 
 	private final ProductRepository productRepository;
-	private final SaleOffRepository saleOffRepository;
+	
 
 	// Metodo que encontra todos os produtos com estoque abaixo da quantidade
 	// informada
@@ -41,8 +37,7 @@ public class StockServiceImpl implements StockService {
 
 	/*
 	 * Metodo que verifica a quantidade de items no estoque e o seu valor total,
-	 * quantidade de items na promoção e o valor, verificando tambem a quantidade de
-	 * items vencidos e o prejuizo com os items vencidos.
+	 *  verificando tambem a quantidade de items vencidos e o prejuizo com os items vencidos.
 	 */
 
 	@Override
@@ -51,42 +46,33 @@ public class StockServiceImpl implements StockService {
 		verifyExpirationDate();
 		List<Product> products = productRepository.findAllOnStock();
 
-		Long quantity = 0L;
-		Long expiredProductsQuantity = 0L;
-		Long productsOnSaleQuantity = 0L;
-		BigDecimal productsOnSaleValue = BigDecimal.ZERO;
+		Integer quantity = 0;
 		BigDecimal totalValue = BigDecimal.ZERO;
-		BigDecimal productsOnSaleTotalValue = BigDecimal.ZERO;
-		BigDecimal expiredProductsValue = BigDecimal.ZERO;
+		
+		Integer expiredProductsQuantity = 0;
+		BigDecimal expiredProductsTotalValue = BigDecimal.ZERO;
 
-		if (products.size() < 0) {
-			return new Stock(quantity, totalValue, productsOnSaleQuantity, productsOnSaleValue, expiredProductsQuantity,
-					expiredProductsValue);
+		if (products.size() < 1) {
+			return new Stock(quantity, totalValue, expiredProductsQuantity,
+					expiredProductsTotalValue);
 		}
 
 		for (Product p : products) {
-
+		
 			if (!p.isExpired()) {
 				quantity += p.getQuantity();
-				totalValue = productsOnSaleTotalValue.add(p.getAcquisitionPrice().multiply(BigDecimal.valueOf(p.getQuantity())));
-			} else if (p.isOnSale()) {
-
-				Optional<SaleOff> saleOffOptional = saleOffRepository.find(p.getId());
-				productsOnSaleValue = saleOffOptional.get().getSalePrice().multiply(BigDecimal.valueOf(p.getQuantity()));
-				productsOnSaleQuantity += p.getQuantity();
-				productsOnSaleTotalValue = p.getAcquisitionPrice().multiply(BigDecimal.valueOf(p.getQuantity()));
-
+				totalValue = totalValue.add(p.getAcquisitionPrice().multiply(BigDecimal.valueOf(p.getQuantity())));
+				System.out.println(totalValue);
 			} else {
 				expiredProductsQuantity += p.getQuantity();
-				expiredProductsValue = expiredProductsValue.add(p.getAcquisitionPrice().multiply(BigDecimal.valueOf(p.getQuantity())));
+				expiredProductsTotalValue = expiredProductsTotalValue.add(p.getAcquisitionPrice().multiply(BigDecimal.valueOf(p.getQuantity())));
 			}
-
+			
 		}
-		return new Stock(quantity, totalValue, productsOnSaleQuantity, productsOnSaleValue, expiredProductsQuantity, expiredProductsValue);
+		return new Stock(quantity, totalValue, expiredProductsQuantity, expiredProductsTotalValue);
 	}
 
-	// Metodo executado todos os dias as 06:00 para verificar produtos vencidos no
-	// estoque.
+	// Metodo executado todos os dias as 06:00 para verificar produtos vencidos no estoque. 
 	@Override
 	@Scheduled(cron = "0 0 6 * * *", zone = "America/Sao_Paulo")
 	@Transactional

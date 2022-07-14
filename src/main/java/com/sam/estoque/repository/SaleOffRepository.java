@@ -18,5 +18,5 @@ public interface SaleOffRepository extends JpaRepository<SaleOff, Long> {
 	Optional<SaleOff> findByIdAndActive(@Param("id") Long id);
 	
 	@Query("SELECT s from SaleOff s join s.product p WHERE p.id = :id AND s.active = true")
-	Optional<SaleOff> find(@Param("id") Long id);
+	Optional<SaleOff> findProductOnSale(@Param("id") Long id);
 }
